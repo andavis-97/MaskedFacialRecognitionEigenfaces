@@ -63,7 +63,7 @@ string removeSpaces(string str)
     return str;
 }
 
-static void read_csv(const string& filename, vector<Mat>& images, vector<int>& labels, vector<Mat>& test_images, char separator = ';') {
+static void read_csv(const string& filename, vector<Mat>& images, vector<int>& labels, vector<Mat>& test_images, vector<int> test_labels, char separator = ';') {
     string fn = "C:/Users/aliso/Documents/CIS663/new_small_not_masked.csv";
     std::ifstream file(fn.c_str(), ifstream::in);
     if (!file) {
@@ -145,7 +145,7 @@ static void read_csv(const string& filename, vector<Mat>& images, vector<int>& l
             }
             //cvtColor(m, m2, cv::COLOR_BGR2GRAY);
             test_images.push_back(mTest2);
-            //labels.push_back(atoi(classlabel.c_str()));
+            test_labels.push_back(atoi(classlabel.c_str()));
         }
     }
 }
@@ -166,10 +166,11 @@ int main(int argc, const char* argv[]) {
     vector<Mat> images;
     vector<Mat> test_images;
     vector<int> labels;
+    vector<int> test_labels;
     // Read in the data. This can fail if no valid
     // input filename is given.
     try {
-        read_csv(fn_csv, images, labels, test_images);
+        read_csv(fn_csv, images, labels, test_images, test_labels);
     }
     catch (const cv::Exception& e) {
         cerr << "Error opening file \"" << fn_csv << "\". Reason: " << e.msg << endl;
@@ -185,7 +186,6 @@ int main(int argc, const char* argv[]) {
     // later in code to reshape the images to their original
     // size:
     int height = images[0].rows;
-    std::cout << height << std::endl;
     // The following lines simply get the last images from
     // your dataset and remove it from the vector. This is
     // done, so that the training data (which we learn the
