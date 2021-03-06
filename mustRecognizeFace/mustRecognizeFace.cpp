@@ -63,8 +63,8 @@ string removeSpaces(string str)
     return str;
 }
 
-static void read_csv(const string& filename, vector<Mat>& images, vector<int>& labels, char separator = ';') {
-    string fn = "C:/Users/aliso/Documents/CIS663/new_not_masked.csv";
+static void read_csv(const string& filename, vector<Mat>& images, vector<int>& labels, vector<Mat>& test_images, char separator = ';') {
+    string fn = "C:/Users/aliso/Documents/CIS663/new_small_not_masked.csv";
     std::ifstream file(fn.c_str(), ifstream::in);
     if (!file) {
         string error_message = "No valid input file was given, please check the given filename.";
@@ -105,6 +105,49 @@ static void read_csv(const string& filename, vector<Mat>& images, vector<int>& l
             labels.push_back(atoi(classlabel.c_str()));
         }
     }
+
+
+    string fn_test_samples = "C:/Users/aliso/Documents/CIS663/new_small_masked.csv";
+    std::ifstream file_test(fn_test_samples.c_str(), ifstream::in);
+    if (!file_test) {
+        string error_message = "No valid input file was given, please check the given filename.";
+        CV_Error(Error::StsBadArg, error_message);
+    }
+    //string line, path, classlabel;
+    int testlinecount = 0;
+    while (getline(file_test, line)) {
+        stringstream liness(line);
+        getline(liness, path, separator);
+        getline(liness, classlabel);
+        if (!path.empty() && !classlabel.empty()) {
+            //path = removeSpaces(path);
+            //std::cout << "path: " << path << std::endl;
+            //images.push_back(imread(path, 0));
+            std::cout << "Test Path: " << path << std::endl;
+            Mat mTest = imread(path, 0);
+            if (mTest.empty())
+            {
+                std::cout << "Empty." << std::endl;
+            }
+            if (mTest.data == NULL)
+            {
+                std::cout << "null image" << std::endl;
+            }
+            Mat mTest2;
+            if (!mTest.isContinuous())
+            {
+                std::cout << "Running close for non-continuous" << std::endl;
+                mTest2 = mTest.clone();
+            }
+            else
+            {
+                mTest2 = mTest;
+            }
+            //cvtColor(m, m2, cv::COLOR_BGR2GRAY);
+            test_images.push_back(mTest2);
+            //labels.push_back(atoi(classlabel.c_str()));
+        }
+    }
 }
 int main(int argc, const char* argv[]) {
     // Check for valid command line arguments, print usage
@@ -121,11 +164,12 @@ int main(int argc, const char* argv[]) {
     string fn_csv = string(argv[1]);
     // These vectors hold the images and corresponding labels.
     vector<Mat> images;
+    vector<Mat> test_images;
     vector<int> labels;
     // Read in the data. This can fail if no valid
     // input filename is given.
     try {
-        read_csv(fn_csv, images, labels);
+        read_csv(fn_csv, images, labels, test_images);
     }
     catch (const cv::Exception& e) {
         cerr << "Error opening file \"" << fn_csv << "\". Reason: " << e.msg << endl;
